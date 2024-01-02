@@ -1,0 +1,59 @@
+<html>
+  <head></head>
+  <body>
+    <h1>Hello user</h1>
+    <p>Please choose your WIFI network:</p>
+    <div class="wifiList"></div>
+  </body>
+  <button onclick="{searchWifi()}">Search wifi</button>
+  <div class="passInput"></div>
+</html>
+<script>
+  let selectedWifi = "";
+  async function searchWifi() {
+    let asd;
+    try {
+      let res = await fetch("/search-wifi");
+      res = await res.json();
+      let tableStr = '<table style="width: 50%">';
+      res.list.forEach((element) => {
+        tableStr += `<tr>
+            <th>${element}</th>
+            <th><button onclick="{selectWifi('${element}')}">Select</button></th>
+            </tr>
+            `;
+      });
+      tableStr += "</table>";
+      let container = document.querySelector(".wifiList");
+      container.innerHTML = tableStr;
+      return;
+    } catch (error) {
+      asd = error;
+      console.log(error);
+    }
+  }
+  function selectWifi(name) {
+    selectedWifi = name;
+    let container = document.querySelector(".wifiList");
+    container.innerHTML = `<span>Selected Wifi: ${selectedWifi}</span>`;
+
+    let container2 = document.querySelector(".passInput");
+    container2.innerHTML = `<br><input id="passwordInput"/><br><br>
+    <button onclick="{submitWifiAndPassword()}">Submit</button>`;
+  }
+  async function submitWifiAndPassword() {
+    let pass = document.getElementById("passwordInput").value;
+    if (pass.length < 8)
+      return alert("Password length must be longer than 8 characters");
+    //alert("pass:" + pass + " Wifi: " + selectedWifi);
+    let res = await fetch("/submit-wifi", {
+        method: 'POST',
+        headers: {'Accept': "application/json",
+                  'Content-Type': "application/json"},
+                  body: JSON.stringify({pass: pass, wifi: selectedWifi})
+        });
+    console.log(res)
+    alert(res)
+    alert(JSON.stringify(res))
+  }
+</script>
